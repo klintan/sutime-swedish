@@ -3,7 +3,7 @@
   tokens = { type: "CLASS", value: "edu.stanford.nlp.ling.CoreAnnotations$TokensAnnotation" }
   numtokens = { type: "CLASS", value: "edu.stanford.nlp.ling.CoreAnnotations$NumerizedTokensAnnotation" }
 
-  $TIMEOFDAY = "/morgon|eftermiddag|kväll|natt|mitt på dagen|midnatt|lunchtid|middagstid|kvällstid|skymning|daggryning|soluppgång|solnedgång|gryning|dagning/";
+  $TIMEOFDAY = "/morgon|eftermiddag|kväll|natt|mitt på dagen|midnatt|lunchtid|middagstid|kvällstid|skymning|kvällning|daggryning|soluppgång|solnedgång|gryning|dagning/";
 
   $NUM = ( [ { numcomptype:NUMBER } ] );
   $INT = ( [ { numcomptype:NUMBER } & !{ word:/.*\.\d+.*/} & !{ word:/.*,.*/ } ] );
@@ -240,19 +240,19 @@
   { (/morgnar?|mornar/) => MORNING }
   { (/eftermiddagar?/) => AFTERNOON }
   { (/kvällar?/) => EVENING }
-  { (/dusks?/) => DUSK }
-  { (/twilights?/) => TWILIGHT }
-  { (/dawns?|daybreaks?/) => DAWN }
-  { (/sunrises?|sunups?/) => SUNRISE }
-  { (/sundowns?|sunsets?/) => SUNSET }
-  { (/middays?|noons?/) => NOON }
-  { (/midnights?/) => MIDNIGHT }
-  { (/teatimes?/) => TEATIME }
-  { (/lunchtimes?/) => LUNCHTIME }
-  { (/dinnertimes?/) => DINNERTIME }
-  { (/suppertimes?/) => SUPPERTIME }
-  { (/daylights?|days?|daytimes?/) => DAYTIME }
-  { (/nighttimes?|nights?|overnights?/) => NIGHT }
+  { (/skymningar?/) => DUSK }
+  { (/gryningar?/) => TWILIGHT }
+  { (/daggryningar?|dagningar?/) => DAWN }
+  { (/soluppgångar?/) => SUNRISE }
+  { (/solnedgångar?/) => SUNSET }
+  { (/middagar?/) => NOON }
+  { (/midnätter?/) => MIDNIGHT }
+  { (/tetider?/) => TEATIME }
+  { (/lunchtider?/) => LUNCHTIME }
+  { (/middagstider?/) => DINNERTIME }
+  { (/kvällsmålstider?/) => SUPPERTIME }
+  { (/dagtider?|dagar?|dagstider?/) => DAYTIME }
+  { (/nattider?|nätter?|övernattningar?/) => NIGHT }
 
   # Seasons
   { (/somrar?/) => SUMMER }
@@ -274,13 +274,13 @@
   { (/fredagar?/) => FRIDAY }
   { (/lördagar?/) => SATURDAY }
   { (/söndagar?/) => SUNDAY }
-  { (/mons?/) => MONDAY }
-  { (/tues?/) => TUESDAY }
-  { (/weds?/) => WEDNESDAY }
-  { (/thurs?/) => THURSDAY }
-  { (/fris?/) => FRIDAY }
-  { (/sats?/) => SATURDAY }
-  { (/suns?/) => SUNDAY }
+  { (/mån?/) => MONDAY }
+  { (/tis?|tisd?/) => TUESDAY }
+  { (/ons?/) => WEDNESDAY }
+  { (/tor?|tors?/) => THURSDAY }
+  { (/fre?/) => FRIDAY }
+  { (/lör?/) => SATURDAY }
+  { (/sön?/) => SUNDAY }
 
   { (/helger?/) => WEEKEND }
   { (/vardagar?/) => WEEKDAY }
@@ -379,23 +379,14 @@
   { ruleType: "time", pattern: /HH?''hmm/ }
 
   #Sweden and the nordics
-#Sweden
-  yyyy-mm-dd;[153] casually many people use d/m yyyy or d/m -yy. Another possible format is d.m.yyyy.
-#Norway
-  dd.mm.(yy)yy[122]
-(d.m.y; the fraction form d/m-y is common
-#Denmark
-dd-mm-(yy)yy is the traditional Danish date format.[49] The international format yyyy-mm-dd or yyyymmdd is also accepted. There are no official standard for numeric date format, although the traditional format is the most widely used. The formats d. 'monthname' yyyy and in handwriting d/m-yy or d/m yyyy are also acceptable
-
-#Finland
-d.m.yyyy or d. month yyyy
+  { ruleType: "time", pattern: /dd\\?\/MM\\?-(yyyy|yy)/ }
 
   # Timezones
   { ruleType: "time", pattern: /zzz/, action: Tag(_, "TIMEZONE", TRUE) }
   { ruleType: "time", pattern: /ZZZ/, action: Tag(_, "TIMEZONE", TRUE) }
 
   # Birthdays
-  { ( [ { tag:NNP } ]+ [ { tag:POS } ] /birthday/ ) => SimpleTime($0) }
+  { ( [ { tag:NNP } ]+ [ { tag:POS } ] /födelsedag/ ) => SimpleTime($0) }
 
   # Generic decade
   { ( /the/? ( /\w+teen/ /$Decades/ ) )
@@ -453,12 +444,12 @@ d.m.yyyy or d. month yyyy
   }
 
   # some quarter expressions - need to add year refs
-  { ( /the/? [{tag:JJ}]? ($NUM_ORD) /-/? [{tag:JJ}]? /quarter/ ) =>
+  { ( [{tag:JJ}]? ($NUM_ORD) /-/? [{tag:JJ}]? /kvartal/ ) =>
       TemporalCompose(CREATE, QUARTER_OF_YEAR, $1[0].numcompvalue) }
-  { text: /(\d+)(st|nd|rd|th)-quarter/ =>
+  { text: /(\d+)(:a|:e|)-kvartalet/ =>
       TemporalCompose(CREATE, QUARTER_OF_YEAR, $1 )
   }
-  { text: /($BasicOrdTerm)-quarter/ =>
+  { text: /($BasicOrdTerm)-kvartalet/ =>
       TemporalCompose(CREATE, QUARTER_OF_YEAR, BASIC_ORDINAL_MAP[Lowercase($1)])
   }
 
